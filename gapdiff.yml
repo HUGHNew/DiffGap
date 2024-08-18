@@ -1,5 +1,4 @@
 name: gapdiff
-name: binddm
 channels:
   - pytorch
   - pyg
