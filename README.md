@@ -2,6 +2,17 @@
 
 Official implementation for "[Bridging the Gap between Learning and Inference for Diffusion-Based Molecule Generation]" **(AAAI 2025)**.
 
+## Installation
+
+To create the virtual environment, use the following command.
+```bash
+conda env create -f gapdiff.yml
+```
+
+Or do it step by step following the modified guidance in [TargetDiff Installation](./targetdiff/README.md#Install-via-Conda-and-Pip)
+
+> Python<3.10 is a must for Vina's compatibility.
+
 ## Data
 
 The data preparation follows [TargetDiff](https://arxiv.org/abs/2303.03543). 
@@ -17,7 +28,7 @@ python -m pipeline <configs> <sampling_results> [train|sample|eval] [-c resume_f
 # python -m pipeline configs/sampling.yml sampling_results/reproduce sample # for pipeline starts from sampling
 # python -m pipeline "no matter" sampling_results/reproduce eval # for pipeline for evaluation
 ```
-or you can manually run the script for each stage like TargetDiff or BindDM.
+Or you can manually run the script for each stage like TargetDiff or BindDM.
 
 > We remove the `{train,sample,evaluate}.py` in **BindDM**
 > because they are just the copies of the `{train,sample,evaluate}_diffusion.py` in `scripts`.
