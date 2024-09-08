@@ -1,6 +1,6 @@
 # GapDiff
 
-Official implementation for "[Bridging the Gap between Learning and Inference for Diffusion-Based Molecule Generation]" **(AAAI 2025)**.
+Official implementation for "[Bridging the Gap between Learning and Inference for Diffusion-Based Molecule Generation]".
 
 ## Installation
 
