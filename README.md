@@ -41,4 +41,14 @@ These meta files and checkpoints are coming soon after published.
 
 ## Citation
 
-Coming soon.
+```bibtex
+@misc{liu2024gapdiff,
+      title={Bridging the Gap between Learning and Inference for Diffusion-Based Molecule Generation}, 
+      author={Peidong Liu and Wenbo Zhang and Xue Zhe and Jiancheng Lv and Xianggen Liu},
+      year={2024},
+      eprint={2411.05472},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2411.05472}, 
+}
+```
