@@ -1,4 +1,4 @@
-# GapDiff
+# DiffGap
 
 Official implementation for "[Bridging the Gap between Learning and Inference for Diffusion-Based Molecule Generation]".
 
@@ -6,7 +6,7 @@ Official implementation for "[Bridging the Gap between Learning and Inference fo
 
 To create the virtual environment, use the following command.
 ```bash
-conda env create -f gapdiff.yml
+conda env create -f env.yml
 ```
 
 Or do it step by step following the modified guidance in [TargetDiff Installation](./targetdiff/README.md#Install-via-Conda-and-Pip)
