@@ -24,7 +24,7 @@ def get_sample_config_name(train_config:str, sample_root="./configs/") -> str:
     else:
         return f"{sample_root}/reproduce_{date}.yml"
 
-def main(train_config:str, resule_path:str, launch_stage:Literal["train", "sample", "eval"]="train", split:str=None, checkpoint:str=''):
+def main(train_config:str, resule_path:str, launch_stage:Literal["train", "sample", "eval"]="train", split:str=None, checkpoint:str='', protein_root:str="test_set"):
     pipeline_start = datetime.now()
     stage_mapper = {
         "train": 0,
@@ -69,7 +69,7 @@ def main(train_config:str, resule_path:str, launch_stage:Literal["train", "sampl
 
 
     eval_start = datetime.now()
-    eval_args = EvalArgs(resule_path, verbose=True)
+    eval_args = EvalArgs(resule_path, protein_root=protein_root, verbose=True)
     eval_main(eval_args)
     eval_endup = datetime.now()
     print(f"Evaluation: [{eval_start}-{eval_endup}]={misc.convert_seconds((eval_endup-eval_start).total_seconds())}")

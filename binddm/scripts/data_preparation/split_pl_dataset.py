@@ -6,7 +6,8 @@ from tqdm.auto import tqdm
 
 from torch.utils.data import Subset
 from datasets.pl_pair_dataset import PocketLigandPairDataset
-
+from rdkit import RDLogger
+RDLogger.DisableLog('rdApp.*')
 
 def get_chain_name(fn):
     return os.path.basename(fn)[:6]

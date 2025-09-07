@@ -144,7 +144,6 @@ test
 
 data
 *.md
-!README.md
 images
 examples
 paper

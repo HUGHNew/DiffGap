@@ -1,6 +1,5 @@
 import argparse
 import os
-import shutil
 import time
 from dataclasses import dataclass
 
@@ -141,10 +140,13 @@ def main(args:SampleArgs):
     # Load checkpoint
     ckpt = torch.load(checkpoint, map_location=args.device)
     logger.info(f"Training Config: {ckpt['config']}")
+    data_cfg = ckpt['config'].data
+    data_cfg.update(config.get("data", {}))
+    logger.info(f"Data Config: {data_cfg}")
 
     # Transforms
     protein_featurizer = trans.FeaturizeProteinAtom()
-    ligand_atom_mode = ckpt['config'].data.transform.ligand_atom_mode
+    ligand_atom_mode = data_cfg.transform.ligand_atom_mode
     ligand_featurizer = trans.FeaturizeLigandAtom(ligand_atom_mode)
     transform = Compose([
         protein_featurizer,
@@ -152,13 +154,12 @@ def main(args:SampleArgs):
         trans.FeaturizeLigandBond(),
     ])
 
-    dataset_config = ckpt['config'].data
     if args.split:
-        dataset_config.split = args.split
+        data_cfg.split = args.split
         logger.info(f'Using split file from command line: {args.split}!')
     # Load dataset
     dataset, subsets = get_dataset(
-        config=dataset_config,
+        config=data_cfg,
         transform=transform
     )
     train_set, test_set = subsets['train'], subsets['test']

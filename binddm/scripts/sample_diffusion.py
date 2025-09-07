@@ -141,11 +141,14 @@ def main(args:SampleArgs):
 
     # Load checkpoint
     ckpt = torch.load(checkpoint, map_location=args.device)
+    data_cfg = ckpt['config'].data
+    data_cfg.update(config.get("data", {}))
     logger.info(f"Training Config: {ckpt['config']}")
+    logger.info(f"Data Config: {data_cfg}")
 
     # Transforms
     protein_featurizer = trans.FeaturizeProteinAtom()
-    ligand_atom_mode = ckpt['config'].data.transform.ligand_atom_mode
+    ligand_atom_mode = data_cfg.transform.ligand_atom_mode
     ligand_featurizer = trans.FeaturizeLigandAtom(ligand_atom_mode)
     transform = Compose([
         protein_featurizer,
@@ -155,7 +158,7 @@ def main(args:SampleArgs):
 
     # Load dataset
     dataset, subsets = get_dataset(
-        config=ckpt['config'].data,
+        config=data_cfg,
         transform=transform
     )
     train_set, test_set = subsets['train'], subsets['test']

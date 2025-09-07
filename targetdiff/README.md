@@ -60,7 +60,7 @@ source ~/.bashrc  # alternatively, one can restart their shell session to achiev
 Create Mamba environment
 ```bash
 mamba env create -f environment.yaml
-mamba activate targetdiff  # note: one still needs to use `conda` to (de)activate environments
+conda activate targetdiff  # note: one still needs to use `conda` to (de)activate environments
 ```
 
 -----

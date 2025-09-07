@@ -107,13 +107,15 @@ def main(args:EvalArgs):
             # chemical and docking check
             try:
                 chem_results = scoring_func.get_chem(mol)
+                protein_fn = os.path.join(args.protein_root, r['data'].protein_filename)
+
                 if args.docking_mode == 'qvina':
-                    vina_task = QVinaDockingTask.from_generated_mol(
-                        mol, r['data'].ligand_filename, protein_root=args.protein_root)
+                    with open(protein_fn) as fd:
+                        pdb_block = fd.read()
+                    vina_task = QVinaDockingTask(pdb_block, mol)
                     vina_results = vina_task.run_sync()
                 elif args.docking_mode in ['vina_score', 'vina_dock']:
-                    vina_task = VinaDockingTask.from_generated_mol(
-                        mol, r['data'].ligand_filename, protein_root=args.protein_root)
+                    vina_task = VinaDockingTask(protein_fn, mol)
                     score_only_results = vina_task.run(mode='score_only', exhaustiveness=args.exhaustiveness)
                     minimize_results = vina_task.run(mode='minimize', exhaustiveness=args.exhaustiveness)
                     vina_results = {

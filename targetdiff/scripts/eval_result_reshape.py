@@ -3,23 +3,19 @@ import argparse
 import torch as th
 
 def extract_order(meta_path:str) -> list:
-    meta = th.load(meta_path, weights_only=False)
+    meta = th.load(meta_path)
     return [m[0]['ligand_filename'] for m in meta]
 
 def metrics2meta(metrics_path:str, meta_path:str, order_path:str='') -> list:
-    metrics = th.load(metrics_path, weights_only=False)
-    if isinstance(metrics, dict):
-        results = metrics['all_results']
-    else:
-        results = metrics
+    results = th.load(metrics_path)['all_results']
     # [{'mol', 'smiles', 'ligand_filename', 'pred_pos', 'pred_v', 'chem_results', 'vina'}]
     meta, cache, flag = [], [], None
     for data in results:
-        if flag is None:
+        if not flag:
             flag = data['ligand_filename']
         if flag != data['ligand_filename']:
             meta.append(cache)
-            cache, flag = [], data['ligand_filename']
+            cache, flag = [], None
         cache.append(data)
     if cache:
         meta.append(cache)
@@ -31,7 +27,6 @@ def metrics2meta(metrics_path:str, meta_path:str, order_path:str='') -> list:
         ordered_meta = [meta[mapper.get(ord, -1)] for ord in order_list]
     else:
         ordered_meta = meta
-
     th.save(ordered_meta, meta_path)
     return ordered_meta
 

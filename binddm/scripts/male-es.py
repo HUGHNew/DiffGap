@@ -18,24 +18,26 @@ class Globals:
         "AR",
         "Pocket2Mol",
         "TargetDiff",
-        # "TargetDiff+Ours", # only used for value evaluation
+        "TargetDiff-r",
+        "TargetDiff+Ours",  # only used for value evaluation
+        "BindDM-r",  # BindDM reproduction (seems useless)
         "BindDM+Ours",
     ]  # General Configs
     paths = [
         os.path.join("..", "metrics", f"{p.lower()}_vina_docked.pt") for p in variants
     ]
-    results = [torch.load(p) for p in paths]
+    # results = [torch.load(p) for p in paths]
+    results = [[]]
     atom_dist = []
     c_c_dist = []
 
 
-Globals.results[0] = [
-    [v] for v in Globals.results[0]
-]  # group the reference for common usage
+# group the reference for common usage
+Globals.results[0] = [[v] for v in Globals.results[0]]
 # endregion
 
 
-def vina_energy_plot(figname: str = "paper/mve.jpg", legend_fontsize=20, show=True):
+def vina_energy_plot(figname: str, legend_fontsize=20, show=True):
     OFFSET = 2
     LIGAN = 0
     try:
@@ -244,7 +246,15 @@ def _plot_hist(
     assert len(colors) == rng[1] - rng[0]
     assert len(rng) == 2
 
-    ax.hist(dists[0], bins=BINS, histtype="step", density=True, lw=LW, color="grey", alpha=ALPHA)  # type: ignore
+    ax.hist(
+        dists[0],
+        bins=BINS,
+        histtype="step",
+        density=True,
+        lw=LW,
+        color="grey",
+        alpha=ALPHA,
+    )  # type: ignore
     jsds = []
     for idx, color in zip(range(rng[0], rng[1]), colors):
         jsd = _compute_jsd(dists[idx], reference_profile, BINS)
@@ -283,7 +293,7 @@ def jsd_all_atom_plot(figname: str, show: bool = True):
     )
     dists = [get_all_atom_distance(r) for r in Globals.results]
 
-    last_start = len(Globals.variants) - 1
+    last_start = len(Globals.variants) - 2
     indexes = [(1, 4), (4, last_start), (last_start, len(Globals.variants))]
     spx, spy = 1, len(indexes)
     SUBFIG_SIZE = 5
@@ -308,15 +318,75 @@ def jsd_all_atom_plot(figname: str, show: bool = True):
 
 # endregion All-atom distribution
 
-if __name__ == "__main__":
-    offset = 2
-    for i in range(offset, len(Globals.variants)):
-        div = compute_diversity(Globals.results[i])
-        ha = compute_high_affinity(Globals.results[0], Globals.results[i],True)
-        print(f"{Globals.variants[i]} diversity: {div}")
-        print(f"{Globals.variants[i]} high affinity: {ha}")
 
-    root, suff = "paper", "_es"
-    filer = lambda x: os.path.join(root, f"{x}{suff}.jpg")
-    vina_energy_plot(filer("mve"), show=False)
-    jsd_all_atom_plot(filer("jsd_all_12a"), show=False)
+def annealing_plot(figname: str, show: bool = True):
+    # Create figure with three subplots
+    fig, (ax1, ax2, ax3) = plt.subplots(1, 3, figsize=(15, 5))
+
+    # Define epochs
+    epochs = np.linspace(0, 200, 100)
+    xlim, ylim = 210, 1.05
+    titles = ["(a)", "(b)", "(c)"]
+
+    # Panel (a) - Different μ values
+    colors_a = ["red", "green", "blue", "orange", "cyan"]
+    mu_values = [1, 12, 25, 40, 50]
+
+    for i, mu in enumerate(mu_values):
+        p = mu / (mu + np.exp(epochs / mu))
+        ax1.plot(epochs, p, linewidth=2, label=f"μ={mu}")
+
+    # Panel (b) - Different r values
+    colors_b = ["red", "black", "green", "blue", "orange", "cyan"]
+    r_values = [1.5, 2, 3, 4, 8, 250]
+    for i, r in enumerate(r_values):
+        p = np.sqrt((r**2 - (epochs / 100) ** 2).clip(0)) / r
+        if r > 8:
+            r = r"$\infty$"
+        ax2.plot(epochs, p, linewidth=2, label=f"r={r}")
+
+    # Panel (c) - Three different conditions
+    colors_c = ["red", "green", "blue"]
+    # μ=25 condition (similar to panel a)
+    mu = 25
+    c0 = mu / (mu + np.exp(epochs / mu))
+    # slope=-0.005 condition (linear decay)
+    slope = -0.005
+    c1 = 1 + slope * epochs
+    # r=2 condition (circle decay)
+    r = 2
+    c2 = np.sqrt((r**2 - (epochs / 100) ** 2).clip(0)) / r
+    ax3.plot(epochs, c0, linewidth=2, label=f"μ={mu}")
+    ax3.plot(epochs, c1, linewidth=2, label=f"slope={slope}")
+    ax3.plot(epochs, c2, linewidth=2, label=f"r={r}")
+
+    for i, ax in enumerate([ax1, ax2, ax3]):
+        ax.set_xlabel("epoch")
+        if i == 0:
+            ax.set_ylabel("p", rotation='vertical')
+            
+        ax.set_title(titles[i])
+        ax.grid(True, alpha=0.3)
+        ax.set_xlim(0, xlim)
+        ax.legend()
+        ax.set_ylim(0, ylim)
+
+    fig.tight_layout()
+    fig.savefig(figname)
+    if show:
+        fig.show()
+
+
+if __name__ == "__main__":
+    # offset = 2
+    # for i in range(offset, len(Globals.variants)):
+    #     div = compute_diversity(Globals.results[i])
+    #     ha = compute_high_affinity(Globals.results[0], Globals.results[i])
+    #     print(f"{Globals.variants[i]} diversity: {div}")
+    #     print(f"{Globals.variants[i]} high affinity: {ha}")
+
+    root, suff = "paper", "_esf"
+    filer = lambda x: os.path.join(root, f"{x}{suff}.pdf")
+    # vina_energy_plot(filer("mve"), 16, show=False) # figure 2
+    # jsd_all_atom_plot(filer("dist_12a"), show=False) # figure 3
+    annealing_plot(filer("ablation"), show=False)  # figure 4
